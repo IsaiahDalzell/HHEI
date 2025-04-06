@@ -1,0 +1,1377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>On the Nature of Entrepreneurship</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet"> <!-- For Montserrat font-family-->
+    <style>
+        /* Set consistent font-family for all text */
+        body, button, #groupSelector, #summaryGroupSelector {
+            font-family: 'Montserrat', sans-serif;
+            color: #0B132B;
+        }
+
+        /* General format for website body and default formats for all elements*/
+        body {
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        /* Change cursor to a pointer for all buttons */
+        button, #groupSelector #summaryGroupSelector{
+            cursor: pointer;
+        }
+
+        /* Title and author credits */
+        header {
+            text-align: center;
+            padding: 15px;
+            background-color: #0B132B;
+            color: white;
+        }
+        header h1 {
+            font-size: 2.5rem;
+        }
+
+        /* Tab selection */
+        .tab-container {
+            display: flex;
+            /* position: absolute;   <-- remove or comment out
+            left: 50%;
+            transform: translateX(-50%); */
+            width: 100%;             /* let the container span the full width */
+            margin-top: 0;           /* adjust margin as needed */
+            gap: 0;                  /* remove gap so buttons are flush; or keep a small gap if preferred */
+            /* you can also add padding: 0; if needed */
+        }
+
+        .tab-button {
+            flex: 1;
+            text-align: center;
+            font-size: 1.1rem;
+            padding: 1rem;
+            background-color: white;
+            border: none;
+            border-radius: 0; 
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            white-space: nowrap;
+        }
+
+        /* Optionally, adjust hover to keep it consistent */
+        .tab-button:hover {
+            background-color: #ddd;
+        }
+
+        /* Tab display */
+        .tab-pane {
+            display: none; /* Hide all tabs by default */
+        }
+        .tab-button.active {
+            background-color: #2e7eb6;
+            color: white;
+        }
+        .tab-pane.active {
+            display: block; /* Show only the active tab */
+        }
+        .tab-content {
+            margin-top: 20px; /* Ensure proper spacing with other elements*/
+        }
+
+        .hidden-tab {
+            display: none;
+        }
+
+        /* Tab 1 (Main Findings) Content */
+        #container {
+            display: flex;
+            flex-wrap: nowrap;
+            color: #0B132B;
+            gap: 20px;
+            justify-content: center;
+            margin: 20px;
+            align-items: center;
+            position: relative;
+            max-height: 120vh;
+        }
+        /* Group Selection */
+        #groupContainer {
+            flex-direction: column;
+            width: 100%;
+            color: #0B132B;
+            max-width: 205px;
+            background-color: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 20px;
+            bottom: 20px;
+        }
+        #groupContainer h3 {
+            font-size: 15px;
+            color: #0B132B;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        #groupSelector, #summaryGroupSelector {
+            font-size: 15px;
+            font-weight: bold;
+            border-radius: 10px;
+            width: fit-content;
+            text-align: center;
+            background-color: rgb(231, 231, 231);
+        }        
+        .slide {
+            min-width: 100%;
+            display: none;
+        }
+        .slide.active {
+            display: block;
+        }
+        input[type="checkbox"] {
+            accent-color: #2e7eb6;
+        }
+        #downloadContainer {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        /* Data and image download button formats */
+        #downloadContainer button, #button-container button {
+            background-color: rgb(231, 231, 231);
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            border: none;
+        }
+        #downloadContainer button {
+            padding: 10px 15px;
+        }
+        #downloadContainer button:hover, #button-container button:hover, .tab-button.active {
+            background-color: #2e7eb6;
+            color: white;
+        }
+        #button-container {
+            width: auto; /* Fixed width for the button column */
+            padding: 10px;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        /* Charts */
+        #tab1 canvas {
+            color: #0B132B;
+            width: 100% !important;
+            max-width: 800px; /* Prevents excessive shrinking THIS IS THE PROBLEM W/ TAB 3!!!!! */ 
+            height: max-content !important;
+            max-height: 50vh; /* Ensures a minimum display height */
+            min-height: 200px;
+            border-radius: 10px;
+            display: block;
+            margin: auto;
+        }
+        /* PSE Chart */
+        .plotGroup {
+            color: #0B132B;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            width: 50%;
+            max-width: auto;
+            min-width: 400px; /* Prevents excessive shrinking */
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+        }
+        /* Reference Group Chart */
+        .plotGroupSlides {
+            color: #0B132B;
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            position: relative;
+            align-items: center;
+        }
+        .plotSlide {
+            color: #0B132B;
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            position: relative;
+            justify-content: center;
+            align-items: center;
+        }
+        .plotSlide.active {
+            color: #0B132B;
+            display: block;
+            justify-content: center;
+            align-items: center;
+            margin: auto;
+        }
+        @media (max-width: 1500px) {
+            .plotGroup {
+                width: 100%;
+                max-width: auto;
+                min-width: 400px; /* Maintain minimum width even as viewing window is resized*/
+            }
+
+            #container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            #groupContainer {
+                width: 100%;
+                max-width: 100%;
+            }
+        }
+
+        /* Disclaimer */
+        footer {
+            background-color: #0B132B;
+            color: white;
+            text-align: center;
+            padding: 5px;
+            font-size: 0.8rem;
+        }
+
+      /* Tab 3 (Summary) Contents */
+        #containerTab3 {
+            display: flex; /* Enables Flexbox layout */
+            width: 100%;
+            align-items: center;
+            padding: 20px;
+            box-sizing: border-box; /* Ensures padding is included in width calculation */
+            gap: 20px;
+        }
+
+        #groupContainerTab3 {
+            flex-shrink: 0; /* Prevents shrinking, making it only as wide as its content */
+            flex-direction: column;
+            width: auto; /* Takes only as much width as needed */
+            max-width: 200px;
+            height: auto; /* Takes only as much height as needed */
+            background-color: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 20px;
+            bottom: 20px;
+        }
+
+        #chart-containerTab3, #table-containerTab3 {
+            display: flex;
+            flex-direction: column;
+            height: 100%; /* Ensures both chart and table fill the height */
+            background-color: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        #chart-containerTab3 {
+            flex: 1 1 75%; /* Takes 60% of the remaining width */
+            width: 100%; /* Ensures it fills the width of its container */
+            aspect-ratio: 5/3;
+        }
+
+        #table-containerTab3 {
+            flex: 1 1 25%; /* Takes 40% of the remaining width */
+            width: 100%; /* Ensures it fills the width of its container */
+        }
+
+        #groupContainerTab3 select,
+        #groupContainerTab3 .checkboxContainer {
+            width: 100%;
+        }
+
+        /* Optional: Style for the select and checkbox container */
+        #summaryGroupSelector {
+            width: 100%;
+            padding: 2px;
+            margin-bottom: 10px;
+        }
+
+        .checkboxContainer {
+            padding: 10px;
+        }
+
+        .checkboxContainer .slide {
+            margin-bottom: 15px;
+        }
+
+        .checkboxContainer input[type="checkbox"] {
+            margin-right: 8px;
+        }
+
+        #chart-containerTab3 canvas {
+            width: 100% !important; /* Ensure canvas takes full width of its container */
+            height: 100% !important; /* Ensure canvas takes full height of its container */
+            display: block !important; /* Ensures the canvas behaves like a block element */
+            object-fit: contain !important; /* Ensures the canvas scales properly without distortion */
+        }
+
+        #table-containerTab3 table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 10px;
+        }
+
+        #table-containerTab3 th, #table-containerTab3 td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>On the Nature of Entrepreneurship</h1>
+    <p><i>Part of the <a href="https://www.irs.gov/statistics/soi-tax-stats-joint-statistical-research-program" style="color: rgb(206, 206, 206);" target = "_blank">IRS Joint Statistical Research Program</i></a></p>
+    <p style="text-align: center;">These results come from the SOI working paper <a href="https://www.irs.gov/pub/irs-soi/22rpnatureofentrepreneurship.pdf" style="color: rgb(206, 206, 206);" target = "_blank">On the Nature of Entrepreneurship</a> by 
+        <a href="http://www.bhandarianmol.com" style="color: rgb(206, 206, 206);" target = "_blank">Anmol Bhandari</a>, 
+        <a href="https://sites.google.com/umn.edu/tobeykass/home" style="color: rgb(206, 206, 206);" target = "_blank">Tobey Kass</a>, 
+        <a href="http://mayecon.com" style="color: rgb(206, 206, 206);" target = "_blank">Thomas J. May</a>, 
+        <a href="http://users.econ.umn.edu/~erm/" style="color: rgb(206, 206, 206);" target = "_blank">Ellen McGrattan</a>, 
+        and Evan Schulz.
+    </p>
+</header>
+
+<!-- Tab Selection CURRENTLY HIDDEN TABS HAVE hidden-tab INDICATOR --> 
+<div class="tab-container">
+    <button class="tab-button active" onclick="openTab('tab1', this)">Main Findings</button> <!-- Open to tab 1 (main findings) by default -->
+    <button class="tab-button hidden-tab" onclick="openTab('tab2', this)">CPS Comparison</button>
+    <button class="tab-button hidden-tab" onclick="openTab('tab3', this)">Summary Statistics</button>
+    <button class="tab-button hidden-tab" onclick="openTab('tab4', this)">Additional Data</button>
+    <button class="tab-button" onclick="openTab('tab5', this)">Data and Documentation</button>
+</div>
+  
+  <div class="tab-content">
+    <div id="tab1" class="tab-pane active">
+    <!-- Main Findings Tab -->
+      <div id="container" style="background-color: white; padding: 2rem; border-radius: 10px; box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);">
+        <div id="groupContainer">
+            <h3>Select Groups by
+                <select id="groupSelector" onchange="changeSlideDropdown()">
+                    <option value="0">Demographic</option>
+                    <option value="1">Skills</option>
+                    <option value="2">Industry</option>
+                </select> 
+            </h3>
+            <div class="checkboxContainer">
+                <div class="slide active">
+                    <label><input type="checkbox" id="FullSample" value="FullSample" onchange="updateCheckboxes()" checked="checked"> Full Sample</label><br>
+                    <label><input type="checkbox" id="Men" value="Men" onchange="updateCheckboxes()"> Men</label><br>
+                    <label><input type="checkbox" id="Women" value="Women" onchange="updateCheckboxes()"> Women</label><br>
+                    <label><input type="checkbox" id="Married" value="Married" onchange="updateCheckboxes()"> Married</label><br>
+                </div>
+
+                <div class="slide">
+                    <label><input type="checkbox" id="FullSample" value="FullSample" onchange="updateCheckboxes()" checked="checked"> Full Sample</label><br>
+                    <label><input type="checkbox" id="Edu" value="Edu" onchange="updateCheckboxes()"> College Educated</label><br>
+                    <label><input type="checkbox" id="Cognitive" value="Cognitive" onchange="updateCheckboxes()"> Cognitively Skilled</label><br>
+                    <label><input type="checkbox" id="Interpersonal" value="Interpersonal" onchange="updateCheckboxes()"> Interpersonally Skilled</label><br>
+                    <label><input type="checkbox" id="Manual" value="Manual" onchange="updateCheckboxes()"> Manually Skilled</label><br>
+                </div>
+
+                <div class="slide">
+                    <label><input type="checkbox" id="FullSample" value="FullSample" onchange="updateCheckboxes()" checked="checked"> Full Sample</label><br>
+                    <label><input type="checkbox" id="Agriculture" value="Agriculture" onchange="updateCheckboxes()"> Agriculture</label><br>
+                    <label><input type="checkbox" id="Construction" value="Construction" onchange="updateCheckboxes()"> Construction</label><br>
+                    <label><input type="checkbox" id="Manufacturing" value="Manufacturing" onchange="updateCheckboxes()"> Manufacturing</label><br>
+                    <label><input type="checkbox" id="WholesaleTrade" value="WholesaleTrade" onchange="updateCheckboxes()"> Wholesale Trade</label><br>
+                    <label><input type="checkbox" id="RetailTrade" value="RetailTrade" onchange="updateCheckboxes()"> Retail Trade</label><br>
+                    <label><input type="checkbox" id="Transportation" value="Transportation" onchange="updateCheckboxes()"> Transportation</label><br>
+                    <label><input type="checkbox" id="Information" value="Information" onchange="updateCheckboxes()"> Information</label><br>
+                    <label><input type="checkbox" id="Finance" value="Finance" onchange="updateCheckboxes()"> Finance</label><br>
+                    <label><input type="checkbox" id="RealEstate" value="RealEstate" onchange="updateCheckboxes()"> Real Estate</label><br>
+                    <label><input type="checkbox" id="ProfessionalServices" value="ProfessionalServices" onchange="updateCheckboxes()"> Professional Services</label><br>
+                    <label><input type="checkbox" id="Administration" value="Administration" onchange="updateCheckboxes()"> Administration</label><br>
+                    <label><input type="checkbox" id="HealthCare" value="HealthCare" onchange="updateCheckboxes()"> Health Care</label><br>
+                    <label><input type="checkbox" id="Arts" value="Arts" onchange="updateCheckboxes()"> Arts</label><br>
+                    <label><input type="checkbox" id="Accommodation" value="Accommodation" onchange="updateCheckboxes()"> Accommodation</label><br>
+                    <label><input type="checkbox" id="OtherServices" value="OtherServices" onchange="updateCheckboxes()"> Other Services</label><br>
+                </div>
+            </div>
+
+            <div class="growthCheckboxes">
+                <h3>
+                    Income Growth Percentiles
+                </h3>
+                <label><input type="checkbox" id="10" value="10" checked="checked" onclick="updatePercentiles()"> 10th percentile </label><br>
+                <label><input type="checkbox" id="50" value="50" checked="checked" onclick="updatePercentiles()"> 50th percentile </label><br>
+                <label><input type="checkbox" id="90" value="90" checked="checked" onclick="updatePercentiles()"> 90th percentile </label><br>
+            </div>
+
+            <div id="downloadContainer">
+                <button onclick="downloadData()">Download Data as CSV</button>
+            </div>
+        </div>
+    
+        <div class="plotGroup">
+            <div id="button-container">
+                <button onclick="downloadChart(selfEmployedChart, 'Self-Employed-Income.png')">Download Income Chart ⬇</button>
+                <button onclick="downloadChart(selfGrowthChart, 'Self-Employed-Growth.png')">Download Growth Chart ⬇</button>
+            </div>
+            <canvas id="selfEmployedChart"></canvas>
+            <canvas id="selfGrowthChart"></canvas>
+        </div>
+
+        <div class="plotGroup comparison-plotGroup">
+            <div class="plotGroupSlides">
+                <div class="plotSlide active">
+                    <div id="button-container">
+                        <button onclick="changePlotGroup(-1)">&#9664</button>
+                        <button onclick="downloadChart(paidEmployedChart, 'Paid-Employed-Income.png')">Download Income Chart ⬇</button>
+                        <button onclick="downloadChart(paidGrowthChart, 'Paid-Employed-Growth.png')">Download Growth Chart ⬇</button>
+                        <button onclick="changePlotGroup(1)">&#9654;</button>
+                    </div>
+                    <canvas id="paidEmployedChart"></canvas>
+                    <canvas id="paidGrowthChart"></canvas>
+                </div>
+
+                <div class="plotSlide">
+                    <div id="button-container">
+                        <button onclick="changePlotGroup(-1)">&#9664</button>
+                        <button onclick="downloadChart(notEmployedChart, 'Not-Primarily-Employed-Income.png')">Download Income Chart ⬇</button>
+                        <button onclick="downloadChart(notGrowthChart, 'Not-Primarily-Employed-Growth.png')">Download Growth Chart ⬇</button>
+                        <button onclick="changePlotGroup(1)">&#9654;</button>
+                    </div>
+                    <canvas id="notEmployedChart"></canvas>
+                    <canvas id="notGrowthChart"></canvas>
+                </div>
+
+                <div class="plotSlide">
+                    <div id="button-container">
+                        <button onclick="changePlotGroup(-1)">&#9664</button>
+                        <button onclick="downloadChart(triedSelfEmployedChart, 'Tried-Self-Employed-Income.png')">Download Income Chart ⬇</button>
+                        <button onclick="downloadChart(triedSelfGrowthChart, 'Tried-Self-Employed-Growth.png')">Download Growth Chart ⬇</button>
+                        <button onclick="changePlotGroup(1)">&#9654;</button>
+                    </div>
+                    <canvas id="triedSelfEmployedChart"></canvas>
+                    <canvas id="triedSelfGrowthChart"></canvas>
+                </div>
+
+                <div class="plotSlide">
+                    <div id="button-container">
+                        <button onclick="changePlotGroup(-1)">&#9664</button>
+                        <button onclick="downloadChart(mostlySwitchingChart, 'Mostly-Switching-Income.png')">Download Income Chart ⬇</button>
+                        <button onclick="downloadChart(mostlySwitchingGrowthChart, 'Mostly-Switching-Growth.png')">Download Growth Chart ⬇</button>
+                        <button onclick="changePlotGroup(1)">&#9654;</button>
+                    </div>
+                    <canvas id="mostlySwitchingChart"></canvas>
+                    <canvas id="mostlySwitchingGrowthChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <section id="dataDescription" style="margin: 20px 20px; padding: 0.5rem; background-color: white; border-radius: 10px; box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);">
+        <div style="display: flex; align-items: center; justify-content: center;">
+            <div style="flex: 1; padding-left: 2rem; padding-right: 2rem;">
+                <h3>Data Description</h3>
+                <p>
+                    The data above shows the income patterns for individuals of various employment statuses, compiled from anonymized IRS tax filings. 
+                    The options provided allow you to examine and compare the income patterns of self-employed individuals and several reference groups across selected demographic, skills, and industry groups.                    
+                </p>
+                <ul>
+                    <li><strong>Integrated Income:</strong> Displays income profiles for different demographic groups over time.</li>
+                    <li><strong>Percentile Growth:</strong> Shows the income growth at the 10th, 50th, and 90th percentiles for selected groups.</li>
+                </ul>
+                <p>For more information on the sample, refer to the <a href="https://www.irs.gov/pub/irs-soi/22rpnatureofentrepreneurship.pdf" target = "_blank">full paper</a> 
+                    and the <a href="https://users.cla.umn.edu/~erm/data/soi/nature/OnlineAppendix_2025_01_06.pdf" target = "_blank">online appendix</a>.</p>
+            </div>
+        </div>
+    </section>
+    </div>
+    <div id="tab2" class="tab-pane" style="text-align: center;">
+        <!-- CPS Comparison Tab  -->
+        <p> This page is under construction. </p>
+    </div>
+    <div id="tab3" class="tab-pane" style="text-align: center; padding: 0.04rem; padding-bottom: 1.1rem; padding-left: 1.25rem; padding-right: 1.25rem">
+        <!-- Summary Statistics Tab -->
+        <p> This page is under construction. </p>
+        <div id="containerTab3" style="background-color: white; padding: 2rem; border-radius: 10px; box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);">
+            
+            <!-- Outer flex container: Filters on the left, chart & table on the right -->
+            <div style="display: flex; flex-wrap: wrap; align-items: flex-start;">
+                
+                <!-- Left side: Filters and group selector -->
+                <div id="groupContainerTab3" style="flex: 0 0 250px; min-width: 205px; margin-right: 1.25rem;">
+                    <h3>Select Groups by
+                        <select id="summaryGroupSelector">
+                            <option value="0">Main IRS Sample</option>
+                            <option value="1">After Grouping Individuals</option>
+                        </select> 
+                    </h3>
+                    <div class="checkboxContainer" style="min-width: 205px; align-items: center">
+                        <!-- Slide 1 (default) -->
+                        <div class="slide active">
+                            <label>
+                                <input type="checkbox" id="Total" value="Total" checked="checked"> 
+                                Full Sample
+                            </label><br>
+                            <label>
+                                <input type="checkbox" id="Men" value="Men"> 
+                                Men
+                            </label><br>
+                            <label>
+                                <input type="checkbox" id="Women" value="Women"> 
+                                Women
+                            </label><br>
+                            <label>
+                                <input type="checkbox" id="Edu" value="Edu"> 
+                                College-educated
+                            </label><br>
+                            <label>
+                                <input type="checkbox" id="notEdu" value="notEdu"> 
+                                Not college-educated
+                            </label><br>
+                            <label>
+                                <input type="checkbox" id="SE" value="SE"> 
+                                Self-employed by employer status
+                            </label><br>
+                        </div>
+                        <!-- Slide 2 (optional) -->
+                        <div class="slide">
+                            <label>
+                                <input type="checkbox" id="Men" value="Men"> 
+                                Men
+                            </label><br>
+                            <label>
+                                <input type="checkbox" id="Women" value="Women"> 
+                                Women
+                            </label><br>
+                            <label>
+                                <input type="checkbox" id="Edu" value="Edu"> 
+                                College-educated
+                            </label><br>
+                            <label>
+                                <input type="checkbox" id="notEdu" value="notEdu"> 
+                                Not college-educated
+                            </label><br>
+                            <label>
+                                <input type="checkbox" id="everEmp" value="everEmp"> 
+                                Ever employer
+                            </label><br>
+                            <label>
+                                <input type="checkbox" id="neverEmp" value="neverEmp"> 
+                                Never Employer
+                            </label><br>
+                        </div>
+                    </div>
+                </div>
+    
+                <!-- Right side: Chart and Table side by side -->
+                <div style="flex: 1; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 1.25rem">
+                    
+                    <!-- Chart Container -->
+                    <div style="flex: 1; min-width: 898px; background-color: white; padding: 2rem; border-radius: 10px; box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);">
+                        <canvas id="industryChart"></canvas>
+                    </div>
+    
+                    <!-- Table Container -->
+                    <table id="data-table" style="margin: 0 auto; background-color: white; padding: 2rem; border-radius: 10px; box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);"></div>
+                        <thead>
+                            <tr>
+                                <th>Industry</th>
+                                <th>Total</th>
+                                <th>SE</th>
+                                <th>PE</th>
+                                <th>NE</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated dynamically by your script -->
+                        </tbody>
+                    </table>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="tab4" class="tab-pane" style="text-align: center;">
+      <!-- Additional Data Tables -->
+      <p> This page is under construction. </p>
+    </div>
+    <div id="tab5" class="tab-pane" style="text-align: left;">
+        <!-- Additional Data Tables -->
+        <section id="dataDescription" style="margin: 20px 20px; padding: 0.5rem; background-color: white; border-radius: 10px; box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);">
+            <div style="display: flex; align-items: center; justify-content: center;">
+                <div style="flex: 1; padding-left: 2rem; padding-right: 2rem;">
+                    <h3>Data Downloads</h3>
+                    <p>
+                </div>
+            </div>
+        </section>
+        <section id="goingForward" style="margin: 20px 20px; padding: 0.5rem; background-color: white; border-radius: 10px; box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);">
+            <div style="display: flex; justify-content: center;">
+                <div style="flex: 1; padding-left: 2rem; padding-right: 2rem;">
+                    <h3>Next Steps</h3>
+                    <p>
+                        <p>This site was last updated on <strong>March 28, 2025</strong>.</p>
+                        Future iterations of this site are currently in progress and include the following updates:
+                        <ul>
+                            <li>Visualizations of comparisons between the IRS data and the CPS survey</li>
+                            <li>Visualizations of summary statistics tables</li>
+                        </ul>
+                </div>
+            </div>
+        </section>
+      </div>
+  </div>
+
+<div id="hoverBox" style="position: absolute; top: 100px; left: 50%; transform: translateX(-50%); background-color: #fff; border: 1px solid #ccc; border-radius: 5px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); display: none;">
+    <p id="hoverLabel">Label: </p>
+    <p id="hoverValue">Value: </p>
+</div>
+
+<script>
+
+//                                      INITIALIZE ALL CHARTS
+// Converts CSV text into a JSON structure
+function csvToJson(csv) {
+    const lines = csv.trim().split("\n").map(line => line.split(","));
+    const ages = lines[0].slice(2).map(age => parseInt(age)); // Extract ages from header row
+
+    // Extract unique categories from the first column (excluding header)
+    const categories = [...new Set(lines.slice(1).map(line => line[0]))];
+
+    // Initialize result array with dynamic categories
+    const result = ages.map(age => {
+    const entry = { age };
+    categories.forEach(category => {
+        entry[category] = {}; // Create a dynamic group for each unique category
+    });
+    return entry;
+    });
+
+    // Populate the result with CSV values
+    for (let i = 1; i < lines.length; i++) {
+    const [category, incomeType, ...values] = lines[i];
+    values.forEach((value, index) => {
+        if (result[index] && result[index][category]) {
+        result[index][category][incomeType] = parseFloat(value);
+        }
+    });
+    }
+    return result;
+}
+
+// Inserts the CSV data into an HTML element with id "output"
+function displayData(data) {
+    const outputElem = document.getElementById('output');
+    if (outputElem) {
+    // For readability, format the JSON nicely
+    outputElem.textContent = JSON.stringify(data, null, 2);
+    } else {
+    console.error('Output element not found!');
+    }
+}
+
+// Display an error message in the output element
+function displayError(error) {
+    const outputElem = document.getElementById('output');
+    if (outputElem) {
+    outputElem.textContent = 'Error: ' + error.message;
+    }
+}
+
+async function fetchCsvData() {
+    try {
+        const response = await fetch('https://raw.githubusercontent.com/IsaiahDalzell/HHEI/refs/heads/main/OTNOEA25_A29.csv');
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const csvText = await response.text(); // Get CSV text from response
+        return csvToJson(csvText); // Convert to JSON format
+    } catch (error) {
+        console.error("Error fetching CSV:", error);
+        return null; // Handle errors gracefully
+    }
+}
+
+let csvData;
+
+async function loadCSVData() {
+    csvData = await fetchCsvData();
+    if (!csvData) {
+        console.error("Failed to load CSV data. Charts will not be initialized.");
+        return;
+    }
+}
+
+let selfEmployedChart;
+let paidEmployedChart;
+let notEmployedChart;
+let triedSelfEmployedChart;
+let mostlySwitchingChart;
+
+let selfGrowthChart;
+let paidGrowthChart;
+let notGrowthChart;
+let triedSelfGrowthChart;
+let mostlySwitchingGrowthChart;
+
+loadCSVData().then(() => {
+
+    const ages = csvData.map(row => row.age);
+
+    // Initialize charts
+    selfEmployedChart = createChart('selfEmployedChart','self','Self-Employed Integrated Income')
+    paidEmployedChart = createChart('paidEmployedChart', 'paid', 'Paid-Employed Integrated Income')
+    notEmployedChart = createChart('notEmployedChart', 'not', 'Not Primarily-Employed Integrated Income')
+    triedSelfEmployedChart = createChart('triedSelfEmployedChart', 'tried', 'Tried Self-Employment Integrated Income')
+    mostlySwitchingChart = createChart('mostlySwitchingChart', 'switch', 'Mostly-Switching Integrated Income')
+    selfGrowthChart = createGrowthChart('selfGrowthChart', 'selfGrowth', 'Self-Employed Income Growth Percentiles')
+    paidGrowthChart = createGrowthChart('paidGrowthChart', 'paidGrowth', 'Paid-Employed Income Growth Percentiles')
+    notGrowthChart = createGrowthChart('notGrowthChart', 'notGrowth', 'Not Primarily-Employed Income Growth Percentiles')
+    triedSelfGrowthChart = createGrowthChart('triedSelfGrowthChart', 'triedSelfGrowth', 'Tried Self-Employment Income Growth Percentiles')
+    mostlySwitchingGrowthChart = createGrowthChart('mostlySwitchingGrowthChart', 'switchGrowth', 'Mostly-Switching Income Growth Percentiles')
+
+    // Function to generate integrated income charts (with Full Sample as the default group)
+    function createChart(ctxId, dataKey, title) {
+        const ctx = document.getElementById(ctxId).getContext('2d');
+        return new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ages,
+                datasets: [{
+                    label: 'FullSample',
+                    data: csvData.map(row => row.FullSample[dataKey]),
+                    borderColor: '#1f77b4',
+                    color: '#1f77b4',
+                    borderWidth: 2,
+                    fill: false,
+                    labels: { color: '#0B132B' },
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: true },
+                    title: { display: true, text: title, font: { size: 20 }, color: "#0B132B" },
+                    ticks: { color: '#0B132B' },
+                    tooltip: { enabled: false },
+                    labels: { color: '#0B132B' },
+                },
+                scales: {
+                    x: { title: { display: true, text: 'Age' }, grid: { display: false }, color: "#0B132B" },
+                    y: { title: { display: true, text: 'Income ($1000)' }, suggestedMin: 0, suggestedMax: 200, color: "#0B132B" }
+                }
+            }
+        });
+    };
+
+    // Function to generate income growth charts (with Full Sample as the default group)
+    function createGrowthChart(ctxId, dataKey, title) {
+        const ctx = document.getElementById(ctxId).getContext('2d');
+        return new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ages,
+                datasets: ['10', '50', '90'].map(percentile => ({
+                    label: `${percentile}th`,
+                    data: csvData.map(row => row.FullSample[`${dataKey}${percentile}`]),
+                    borderColor: '#1f77b4',
+                    color: '#1f77b4',
+                    borderWidth: 2,
+                    borderDash: percentile === '50' ? [5, 5] : percentile === '90' ? [1, 1] : [],
+                    pointStyle: percentile === '50' ? 'triangle' : percentile === '90' ? 'star' : undefined,
+                    fill: false,
+                    labels: { color: '#0B132B' },
+                }))
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: true, labels: { usePointStyle: true } },
+                    title: { display: true, text: title, font: { size: 20 }, color: "#0B132B" },
+                    tooltip: { enabled: false },
+                    ticks: { color: '#0B132B' },
+                    labels: { color: '#0B132B' },
+                },
+                scales: {
+                    x: { title: { display: true, text: 'Age' }, grid: { display: false }, min: 30, max: 55, color: "#0B132B" },
+                    y: { title: { display: true, text: 'Growth (%)' }, color: "#0B132B" }
+                }
+            }
+        });
+    };
+
+    // TAB 3 (SUMMARY STATISTICS BY GROUP)
+
+    const industries = [
+        {name: "Construction", total: 7.9, se: 26.9, pe: 8.5, ne: null},
+        {name: "Manufacturing", total: 8.9, se: 2.1, pe: 12.9, ne: null},
+        {name: "Wholesale trade", total: 2.5, se: 1.6, pe: 3.5, ne: null},
+        {name: "Retail trade", total: 6.7, se: 7.2, pe: 9.1, ne: null},
+        {name: "Transportation", total: 3.2, se: 9.8, pe: 3.6, ne: null},
+        {name: "Information", total: 0.3, se: 0.2, pe: 0.5, ne: null},
+        {name: "Finance", total: 0.8, se: 0.4, pe: 1.1, ne: null},
+        {name: "Real estate", total: 1.2, se: 1.9, pe: 1.5, ne: null},
+        {name: "Professional services", total: 1.8, se: 1.6, pe: 2.4, ne: null},
+        {name: "Management", total: 0.3, se: 0.0, pe: 0.5, ne: null},
+        {name: "Administration", total: 3.6, se: 6.9, pe: 4.5, ne: null},
+        {name: "Education", total: 0.1, se: 0.1, pe: 0.1, ne: null},
+        {name: "Health care", total: 2.4, se: 4.2, pe: 3.1, ne: null},
+        {name: "Arts", total: 0.4, se: 0.7, pe: 0.6, ne: null},
+        {name: "Accommodation", total: 3.2, se: 3.0, pe: 4.4, ne: null},
+        {name: "Other services", total: 3.2, se: 17.1, pe: 2.8, ne: null},
+        {name: "Other NAICS", total: 5.1, se: 4.2, pe: 7.1, ne: null},
+        {name: "Missing NAICS", total: 46.7, se: 9.7, pe: 31.9, ne: 100}
+    ];
+
+    // Original Colors
+    const originalColors = {
+        total: industries.map(() => 'rgba(46, 126, 182, 1)'),
+        se: industries.map(() => 'rgba(222, 60, 75, 1)'),
+        pe: industries.map(() => 'rgba(255, 188, 66, 1)'),
+        ne: industries.map(() => 'rgba(125, 222, 146, 1)')
+    };
+
+    // Brighter Color Function
+    function brightenColor(color, factor = 1.5) {
+        const match = color.match(/rgba?\((\d+), (\d+), (\d+),? ([\d\.]+)?\)/);
+        if (!match) return color;
+
+        let [r, g, b, a] = match.slice(1).map(Number);
+        r = Math.min(255, Math.floor(r * factor));
+        g = Math.min(255, Math.floor(g * factor));
+        b = Math.min(255, Math.floor(b * factor));
+        return `rgba(${r}, ${g}, ${b}, ${a || 1})`;
+    }
+
+    // Bar Chart Setup
+    const ctx = document.getElementById('industryChart').getContext('2d');
+    const industryChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: industries.map(industry => industry.name),
+            datasets: [
+                {
+                    label: 'Total',
+                    data: industries.map(industry => industry.total),
+                    backgroundColor: [...originalColors.total],
+                    borderColor: [...originalColors.total.map(c => c.replace('0.6', '1'))],
+                    borderWidth: 1,
+                    ticks: { color: '#0B132B' },
+                    labels: { color: '#0B132B' },
+                },
+                {
+                    label: 'SE',
+                    data: industries.map(industry => industry.se),
+                    backgroundColor: [...originalColors.se],
+                    borderColor: [...originalColors.se.map(c => c.replace('0.6', '1'))],
+                    borderWidth: 1,
+                    ticks: { color: '#0B132B' },
+                    labels: { color: '#0B132B' },
+                },
+                {
+                    label: 'PE',
+                    data: industries.map(industry => industry.pe),
+                    backgroundColor: [...originalColors.pe],
+                    borderColor: [...originalColors.pe.map(c => c.replace('0.6', '1'))],
+                    borderWidth: 1,
+                    ticks: { color: '#0B132B' },
+                    labels: { color: '#0B132B' },
+                },
+                {
+                    label: 'NE',
+                    data: industries.map(industry => industry.ne),
+                    backgroundColor: [...originalColors.ne],
+                    borderColor: [...originalColors.ne.map(c => c.replace('0.6', '1'))],
+                    borderWidth: 1,
+                    ticks: { color: '#0B132B' },
+                    labels: { color: '#0B132B' },
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                tooltip: {
+                    enabled: false
+                }
+            },
+            onHover: (event, chartElements) => {
+                if (chartElements.length > 0) {
+                    const index = chartElements[0].index;
+                    highlightTableRow(index);
+                    highlightChartBar(index);
+                } else {
+                    removeTableHighlight();
+                    resetChartBar();
+                }
+            }
+        }
+    });
+
+    // Table Setup
+    const tableBody = document.querySelector('#data-table tbody');
+    industries.forEach((industry, index) => {
+        const row = document.createElement('tr');
+        row.dataset.index = index;
+        row.innerHTML = `
+            <td>${industry.name}</td>
+            <td>${industry.total}</td>
+            <td>${industry.se}</td>
+            <td>${industry.pe}</td>
+            <td>${industry.ne !== null ? industry.ne : '–'}</td>
+        `;
+
+        // Highlight chart bar when hovering over table row
+        row.addEventListener('mouseenter', () => {
+            highlightChartBar(index);
+            highlightTableRow(index);
+        });
+
+        row.addEventListener('mouseleave', () => {
+            resetChartBar();
+            removeTableHighlight();
+        });
+
+        tableBody.appendChild(row);
+    });
+
+    // Functions to Highlight Chart Bar
+    function highlightChartBar(index) {
+        industryChart.data.datasets.forEach((dataset, datasetIndex) => {
+            dataset.backgroundColor = dataset.backgroundColor.map((color, i) =>
+                i === index ? brightenColor(originalColors[Object.keys(originalColors)[datasetIndex]][i]) : originalColors[Object.keys(originalColors)[datasetIndex]][i]
+            );
+        });
+        industryChart.update();
+    }
+
+    // Reset Chart Bar Color
+    function resetChartBar() {
+        industryChart.data.datasets.forEach((dataset, datasetIndex) => {
+            dataset.backgroundColor = [...originalColors[Object.keys(originalColors)[datasetIndex]]];
+        });
+        industryChart.update();
+    }
+
+    // Highlight Table Row on Hover
+    function highlightTableRow(index) {
+        document.querySelectorAll('#data-table tbody tr').forEach((row, i) => {
+            row.style.backgroundColor = i === index ? 'rgb(231, 231, 231)' : ''; // Light yellow highlight
+        });
+    }
+
+    // Remove Table Highlight
+    function removeTableHighlight() {
+        document.querySelectorAll('#data-table tbody tr').forEach(row => {
+            row.style.backgroundColor = '';
+        });
+    }
+
+    // ADDITIONAL FUNCTIONALITY
+
+    const hoverBox = document.getElementById('hoverBox');
+    const hoverLabel = document.getElementById('hoverLabel');
+    const hoverValue = document.getElementById('hoverValue');
+
+    // Add a plugin to draw a vertical line on hover
+    const verticalLinePlugin = {
+        id: 'hoverLine',
+        afterDatasetsDraw(chart) {
+            if (!chart.hoveredX) return;
+
+            const ctx = chart.ctx;
+            const x = chart.hoveredX;
+            const chartArea = chart.chartArea;
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(x, chartArea.top);
+            ctx.lineTo(x, chartArea.bottom);
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';  // Adjust line color and transparency
+            ctx.stroke();
+            ctx.restore();
+        }
+    };
+
+    // Register the plugin globally
+    Chart.register(verticalLinePlugin);
+
+    // Modify the hover handler to update the x-position for the line
+    function handleHover(event, chart) {
+        const activePoints = chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
+        if (activePoints.length) {
+            const dataIndex = activePoints[0].index;
+            let content = '';
+
+            chart.data.datasets.forEach((dataset, datasetIndex) => {
+                if (!chart.isDatasetVisible(datasetIndex)) return;
+
+                const value = dataset.data[dataIndex];
+                const label = dataset.label;
+
+                if (datasetIndex === activePoints[0].datasetIndex) {
+                    content += `<p style="font-weight: bold;">${label}: ${value}</p>`; // Bold the value for the data series being hovered over
+                } else {
+                    content += `<p>${label}: ${value}</p>`; // List all other data series values for the given age
+                }
+            });
+
+            hoverLabel.innerHTML = `Age: ${chart.data.labels[dataIndex]}`;
+            hoverLabel.style.fontWeight = 'bold';
+            hoverValue.innerHTML = content;
+
+            const canvasPosition = chart.canvas.getBoundingClientRect();
+            const mouseX = event.clientX - canvasPosition.left;
+            const mouseY = event.clientY - canvasPosition.top;
+
+            const offsetX = window.scrollX || window.pageXOffset;
+            const offsetY = window.scrollY || window.pageYOffset;
+
+            hoverBox.style.padding = '5px';
+            hoverBox.style.fontSize = '11px';
+            widthOffest = (hoverBox.offsetWidth / 2);
+            hoverBox.style.left = `${canvasPosition.left + mouseX + widthOffest + offsetX}px`; // Change position of the hoverBox based upon position of the cursor and window
+            hoverBox.style.top = `${canvasPosition.top + mouseY + 5 + offsetY}px`;
+            hoverBox.style.display = 'block';
+
+            // Store x-coordinate for the vertical line
+            chart.hoveredX = activePoints[0].element.x;
+            chart.draw(); // Redraw the chart to show the vertical line
+        } else {
+            hoverBox.style.display = 'none';
+            chart.hoveredX = null;
+            chart.draw(); // Remove the vertical line when not hovering
+        }
+    }
+
+    // Attach event listeners for hover
+    [selfEmployedChart, paidEmployedChart, selfGrowthChart, paidGrowthChart, notEmployedChart, notGrowthChart, triedSelfEmployedChart, 
+        triedSelfGrowthChart, mostlySwitchingChart, mostlySwitchingGrowthChart].forEach(chart => {
+        chart.canvas.addEventListener('mousemove', event => handleHover(event, chart));
+        chart.canvas.addEventListener('mouseout', () => {
+            chart.hoveredX = null;
+            chart.draw();
+        });
+    });
+
+});
+
+
+let lastChecked = null; // Tracks the most recently checked checkbox
+
+function updateCheckboxes() { 
+    const activeSlide = document.querySelector('.slide.active');
+    const checkboxes = activeSlide.querySelectorAll('input[type="checkbox"]');
+    const selectedValues = [];
+
+    // Check all checkboxes and collect selected ones
+    checkboxes.forEach(function(checkbox) {
+        if (checkbox.checked) {
+            selectedValues.push(checkbox.value);
+        }
+    });
+
+    // If more than 4 checkboxes are checked, uncheck the most recently checked one
+    if (selectedValues.length > 4) {
+        if (lastChecked) {
+            lastChecked.checked = false; // Uncheck the most recent one
+        }
+        const index = selectedValues.indexOf(lastChecked.value);
+        if (index > -1) {
+            selectedValues.splice(index, 1);
+        }
+    }
+
+    // Update the lastChecked value to the most recently checked checkbox
+    lastChecked = [...checkboxes].reverse().find(checkbox => checkbox.checked);
+
+    // Store the current percentiles before updating the charts
+    const growthCheckboxes = document.querySelectorAll('.growthCheckboxes input[type="checkbox"]');
+    const selectedPercentiles = [];
+    growthCheckboxes.forEach(function(checkbox) {
+        if (checkbox.checked) {
+            selectedPercentiles.push(checkbox.value);
+        }
+    });
+
+    // Update charts with the selected values
+    updateCharts(selectedValues);
+
+    // After charts are updated, update growth chart percentiles
+    updateGrowthChartPercentiles(selfGrowthChart, selectedValues, 'selfGrowth', selectedPercentiles);
+    updateGrowthChartPercentiles(paidGrowthChart, selectedValues, 'paidGrowth', selectedPercentiles);
+    updateGrowthChartPercentiles(notGrowthChart, selectedValues, 'notGrowth', selectedPercentiles);
+    updateGrowthChartPercentiles(triedSelfGrowthChart, selectedValues, 'triedSelfGrowth', selectedPercentiles);
+    updateGrowthChartPercentiles(mostlySwitchingGrowthChart, selectedValues, 'switchGrowth', selectedPercentiles);
+}
+
+const colorPalette = [  // For giving a unique color to each distinct group on the plot
+    '#2E7EB6', '#DE3C4B', '#FFBC42', '#7DDE92'
+];
+
+
+// Functions to update charts upon a change in group selections
+function generateDataset(groups, dataKey, options = {}) {
+    return groups.map((group, index) => ({
+        label: `${group}${options.suffix || ''}`,
+        data: csvData.map(row => row[group]?.[dataKey]),
+        borderColor: colorPalette[index % colorPalette.length],
+        borderWidth: options.borderWidth || 3,
+        borderDash: options.borderDash || [],
+        pointStyle: options.pointStyle || undefined,
+        fill: false
+    }));
+}
+
+function updateChartData(chart, datasets) {
+    chart.data.datasets = datasets;
+    chart.update();
+}
+
+function updateMultipleCharts(charts, selectedGroups, keys) {
+    charts.forEach((chart, i) =>
+        updateChartData(chart, generateDataset(selectedGroups, keys[i]))
+    );
+}
+
+function updateGrowthChart(chart, selectedGroups, prefix) {
+    const growthConfigs = [
+        { suffix: ' - 10th', key: `${prefix}10`, borderWidth: 2 },
+        { suffix: ' - 50th', key: `${prefix}50`, borderWidth: 2, borderDash: [5, 5], pointStyle: 'triangle' },
+        { suffix: ' - 90th', key: `${prefix}90`, borderWidth: 2, borderDash: [1, 1], pointStyle: 'star' }
+    ];
+
+    chart.data.datasets = growthConfigs.flatMap(config =>
+        generateDataset(selectedGroups, config.key, config)
+    );
+
+    chart.update();
+}
+
+function updateCharts(selectedGroups) {
+    updateMultipleCharts(
+        [selfEmployedChart, paidEmployedChart, notEmployedChart, triedSelfEmployedChart, mostlySwitchingChart],
+        selectedGroups,
+        ['self', 'paid', 'not', 'triedSelf','switch']
+    );
+
+    updateGrowthChart(selfGrowthChart, selectedGroups, 'selfGrowth');
+    updateGrowthChart(paidGrowthChart, selectedGroups, 'paidGrowth');
+    updateGrowthChart(notGrowthChart, selectedGroups, 'notGrowth');
+    updateGrowthChart(triedSelfGrowthChart, selectedGroups, 'triedSelfGrowth');
+    updateGrowthChart(mostlySwitchingGrowthChart, selectedGroups, 'switchGrowth');
+
+}
+
+updateCharts();
+
+// Function to update the percentiles of the growth charts without changing the integrated income charts
+function updatePercentiles(){
+    const activeSlide = document.querySelector('.slide.active');
+        const checkboxes = activeSlide.querySelectorAll('input[type="checkbox"]');
+        const selectedValues = [];
+
+        // Check all checkboxes and collect selected ones
+        checkboxes.forEach(function(checkbox) {
+            if (checkbox.checked) {
+                selectedValues.push(checkbox.value);
+            }
+        });
+
+    const growthCheckboxes = document.querySelectorAll('.growthCheckboxes input[type="checkbox"]')
+    const selectedPercentiles = [];
+
+    growthCheckboxes.forEach(function(checkbox) {
+        if (checkbox.checked) {
+            selectedPercentiles.push(checkbox.value);
+        }
+    });
+
+    updateGrowthChartPercentiles(selfGrowthChart, selectedValues, 'selfGrowth', selectedPercentiles);
+    updateGrowthChartPercentiles(paidGrowthChart, selectedValues, 'paidGrowth', selectedPercentiles);
+    updateGrowthChartPercentiles(notGrowthChart, selectedValues, 'notGrowth', selectedPercentiles);
+    updateGrowthChartPercentiles(triedSelfGrowthChart, selectedValues, 'triedSelfGrowth', selectedPercentiles);
+    updateGrowthChartPercentiles(mostlySwitchingGrowthChart, selectedValues, 'switchGrowth', selectedPercentiles);
+}
+
+function updateGrowthChartPercentiles(chart, selectedGroups, prefix, selectedPercentiles) {
+    const growthConfigs = {
+        "10": { suffix: ' - 10th', key: `${prefix}10`, borderWidth: 2 },
+        "50": { suffix: ' - 50th', key: `${prefix}50`, borderWidth: 2, borderDash: [5, 5], pointStyle: 'triangle' },
+        "90": { suffix: ' - 90th', key: `${prefix}90`, borderWidth: 2, borderDash: [1, 1], pointStyle: 'star' }
+    };
+
+    // Filter configurations based on selected percentiles
+    const filteredConfigs = selectedPercentiles.map(percentile => growthConfigs[percentile]);
+
+    // Generate datasets for the selected percentiles
+    chart.data.datasets = filteredConfigs.flatMap(config =>
+        generateDataset(selectedGroups, config.key, config)
+    );
+
+    chart.update();
+}
+
+// Function to download CSV data (may become unnecessary when actual CSV data is available)
+function downloadData() {
+    // Prepare the CSV header
+    // TODO: Get rid of this when actual CSV file is available
+    const header = "age,Category,self,paid,selfGrowth10,selfGrowth50,selfGrowth90,paidGrowth10,paidGrowth50,paidGrowth90";
+
+    // Initialize an array to hold the rows of CSV data
+    const csvRows = [];
+
+    // Iterate over each age group in the data
+    csvData.forEach(row => {
+        const age = row.age;
+
+        // Iterate over each demographic group (FullSample, Men, Women, Edu, Married)
+        Object.keys(row).forEach(group => {
+            if (group !== "age") {  // Skip the age key
+                const data = row[group];  // Get the data for this group
+
+                // Create a row for the current age and group, and push it into the csvRows array
+                csvRows.push([
+                    age, // age
+                    group, // Category (e.g., FullSample, Men, Women, Edu, Married)
+                    data.self, // self
+                    data.paid, // paid
+                    data.selfGrowth10, // selfGrowth10
+                    data.selfGrowth50, // selfGrowth50
+                    data.selfGrowth90, // selfGrowth90
+                    data.paidGrowth10, // paidGrowth10
+                    data.paidGrowth50, // paidGrowth50
+                    data.paidGrowth90  // paidGrowth90
+                ].join(","));
+            }
+        });
+    });
+
+    // Combine the header and rows
+    const csvContent = "data:text/csv;charset=utf-8," + [header, ...csvRows].join("\n");
+
+    // Create a link element and trigger the download
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', 'entrepreneurship_data.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+function downloadChart(chart, filename) {
+        // Get the original chart canvas
+        const originalCanvas = chart.canvas;
+        const width = originalCanvas.width;
+        const height = originalCanvas.height;
+
+        // Create a temporary canvas
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = width;
+        tempCanvas.height = height;
+        const ctx = tempCanvas.getContext('2d');
+
+        // Fill the background with white
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, width, height);
+
+        // Draw the original chart on top
+        ctx.drawImage(originalCanvas, 0, 0);
+
+        // Convert the temp canvas to an image
+        const url = tempCanvas.toDataURL('image/png');
+
+        // Create a temporary link element
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+
+        // Trigger download and remove the link
+        link.click();
+        document.body.removeChild(link);
+    }
+
+function openTab(tabId, element) {
+    // Hide all tabs and remove active class from buttons
+    const allTabs = document.querySelectorAll('.tab-pane');
+    const allButtons = document.querySelectorAll('.tab-button');
+
+    allTabs.forEach(tab => tab.classList.remove('active'));
+    allButtons.forEach(button => button.classList.remove('active'));
+
+    // Show the selected tab's content and mark the button active
+    document.getElementById(tabId).classList.add('active');
+    element.classList.add('active');
+}
+
+// Ensure only Tab 1 is active on load
+window.onload = function () {
+    document.querySelectorAll('.tab-pane').forEach(tab => tab.classList.remove('active'));
+    document.getElementById('tab1').classList.add('active');
+
+    // Also mark the first tab button as active
+    document.querySelector('.tab-button').classList.add('active');
+};
+
+function changeSlideDropdown() {
+    const slides = document.querySelectorAll('.slide');
+    const selectedIndex = document.getElementById('groupSelector').value;
+
+    slides.forEach(slide => slide.classList.remove('active'));
+    slides[selectedIndex].classList.add('active');
+}
+
+function changePlotGroup(direction) {
+    const plotSlides = document.querySelectorAll('.comparison-plotGroup .plotSlide');
+    
+    // Identify the active slide
+    let currentIndex = Array.from(plotSlides).findIndex(plotSlide => plotSlide.classList.contains('active'));
+    
+    plotSlides[currentIndex].classList.remove('active');
+
+    // Calculate the new index with looping behavior
+    const newIndex = (currentIndex + direction + plotSlides.length) % plotSlides.length;
+
+    plotSlides[newIndex].classList.add('active');
+}
+
+
+</script>
+
+</body>
+
+<footer style="display: flex; align-items: center; justify-content: space-between; padding: 1.5rem;">
+    <div style="text-align: left; display: flex; align-items: center; white-space: wrap;">
+      <p style="font-size: 0.8rem; margin: 0;">
+        <strong>Disclaimer:</strong> May and McGrattan are IRS employees without pay under an agreement made possible by the Intragovernmental Personnel Act of 1970 (5 U.S.C. 3371-3376). This research was conducted while Kass was an employee at the U.S. Department of the Treasury. Any findings, interpretations, opinions and conclusions expressed herein are those of the authors and do not necessarily represent the views or political positions of the IRS or the U.S. Department of the Treasury, or the NSF. All results have been reviewed to ensure that no confidential information is disclosed. All data work for this project involving confidential taxpayer information was done at IRS facilities, on IRS computers, by IRS and Department of the Treasury employees, and at no time was confidential taxpayer data ever outside of the IRS computing environment.
+      </p>
+    </div>
+  
+    <div style="display: flex; align-items: center; margin-left: 3rem;">
+      <a href="https://cla.umn.edu/heller-hurwicz" target="_blank" style="text-decoration: none;">
+        <div style="width: 150px; height: 70px; overflow-y: hidden; position: relative; padding-top: .7rem;">
+            <img src="https://cla.umn.edu/sites/cla.umn.edu/files/HHEI%20wordmark.png" alt="Heller-Hurwicz Economics Institute" style="width: 100%; transform: translateY(-22.5%); border-radius: 10px; transform: translateY(-22.5%); filter: contrast(5)">
+        </div>
+      </a>
+    </div>
+  </footer>
+
+</html>

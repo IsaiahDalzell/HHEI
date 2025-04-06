@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tabbed Page</title>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      margin: 0;
+      background: #f8f9fa;
+      overflow-x: hidden;
+    }
+
+    .tab-container {
+      display: flex;
+      flex-direction: column;
+      width: 99vw;
+      margin: 40px auto;
+      background: white;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .tab-header {
+      display: flex;
+      background: #343a40;
+    }
+
+    .tab-button {
+      flex: 1;
+      padding: 15px;
+      color: #fff;
+      text-align: center;
+      cursor: pointer;
+      border: none;
+      background: rgb(128, 0, 0);
+      transition: background 0.3s ease;
+      font-size: 20px;
+    }
+
+    .tab-button:hover,
+    .tab-button.active {
+      background: rgb(127, 108, 0);
+    }
+
+    .tab-content {
+      display: none;
+      padding: 20px;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    h1 {
+      margin: 20px 0 0;
+      font-size: 3rem;
+      color: #333;
+    }
+
+    .header-wrapper {
+        display: flex;
+        align-items: center;            /* Vertically align text and image */
+        justify-content: center;        /* Start with centering the group */
+        position: relative;
+        width: 100vw;
+    }
+
+    .header-title {
+        font-size: 2rem;
+        z-index: 1;
+    }
+
+    .header-image {
+        position: absolute;
+        right: 40px;                    /* Push to top-right */
+        top: 50%;
+        transform: translateY(-50%);    /* Align vertically with text */
+        width: 7vw;                    /* Adjust as needed */
+        height: auto;
+    }
+
+    .image-text-container {
+        display: flex;
+        align-items: flex-start;      /* align top of image and text */
+        gap: 20px;
+        padding: 20px;
+    }
+
+    .side-image {
+        width: 35vw;
+        height: auto;
+        border-radius: 8px;
+    }
+
+    .text-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 2px;
+        line-height: 2; 
+    }
+
+    .image-container {
+      display: flex;
+      width: 100%;
+      height: 80vh;
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      padding: 10px;
+      gap: 10px;
+    }
+
+    .left, .right {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-radius: 8px;
+      box-sizing: border-box;
+      width: 50%;
+      height: 80vh;
+      position: relative;
+      transition: transform 0.2s ease;
+    }
+
+        /* Semi-Opaque Maroon Overlay */
+    .overlay-maroon {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(128, 0, 0, 0.5); /* Maroon color with 50% opacity */
+      z-index: 1; /* Make sure it's above the image but below the text overlay */
+      border-radius: 8px;
+    }
+
+    .overlay-gold {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(127, 108, 0, 0.5); /* Gold color with 50% opacity */
+      z-index: 1; /* Make sure it's above the image but below the text overlay */
+      border-radius: 8px;
+    }
+
+        /* Overlay Text Styles */
+    .overlay-left, .overlay-right {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      text-align: center;
+      width: 100%;
+      z-index: 2; /* Ensure the text is on top of the gray overlay */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      line-height: 1; /* Adjusted line-height for better spacing */
+      font-size: 48px;
+    }
+
+    .left:hover, .right:hover {
+      transform: scale(1.02);
+    }
+
+  .left img, .right img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* or contain depending on the desired look */
+    border-radius: 8px; /* Optional: match the overlay radius */
+  }
+
+  footer, footer a {
+    background-color: rgb(128, 0, 0);
+    color: rgb(207, 176, 0);
+    text-align: center;
+    padding: 5px;
+    font-size: 0.8rem;
+  }
+
+  </style>
+</head>
+<body>
+
+    <header class="header-wrapper">
+        <h1>Ellen McGrattan</h1>
+        <img src="images/mnlogo.jpg" alt="UMN Economics" class="header-image">
+    </header>
+
+  <div class="tab-container">
+    <div class="tab-header">
+    <button class="tab-button active" onclick="showTab('home')">Home</button>
+      <button class="tab-button" onclick="showTab('cv')">Bio/CV</button>
+      <button class="tab-button" onclick="showTab('research')">Research</button>
+      <button class="tab-button" onclick="showTab('discussions')">Discussions</button>
+      <button class="tab-button" onclick="showTab('teaching')">Teaching</button>
+      <button class="tab-button" onclick="showTab('students')">Students</button>
+    </div>
+
+    <div id="home" class="tab-content active">
+      <div class="image-text-container">
+        <img src="images/EllenMcGrattan.jpg" alt="Ellen McGrattan" class="side-image" />
+        <div class="text-content">
+          <p><b>Ellen McGrattan</b> is a professor of economics at the University of Minnesota, the director of the Heller-Hurwicz Economics Institute, a consultant at the Federal Reserve Bank of Minneapolis, a Fellow of the Econometric Society, and a research associate at NBER. She received her B.S. in economics and mathematics from Boston College and her PhD in economics from Stanford University.</p>
+          <p><b>Contact Information</b><br>
+            Ellen R. McGrattan<br>
+            4-161 Hanson Hall<br>
+            612-625-6714<br>
+            <a href="mailto:erm@umn.edu">erm@umn.edu</a>
+          </p>
+          <p>
+            <b>Office Hours</b><br>
+            By appointment
+          <p>
+            <b>Mailing Address</b><br>
+            Department of Economics<br>
+            University of Minnesota<br>
+            4-101 Hanson Hall <br>
+            1925 4th St S<br>
+            Minneapolis, MN 55455<br>
+            <a href="https://users.cla.umn.edu/~erm/data/">Research Materials</a>
+          </p>
+        </div>
+      </div>
+
+      <h2 style="font-size: 32px; text-align: center;">Recent Work</h2>
+
+      <div class="image-container">
+        <div class="left">
+          <a href="McGrattanBhandariHomepage.html" target="_blank">
+            <img src="images/OTNOE.png" alt="Research Program on Business Taxation">
+            <div class="overlay-maroon"></div>
+            <div class="overlay-left">
+              <p>Research Program on Business Taxation</p>
+            </div>
+          </a> 
+        </div>
+        <div class="right">
+          <a href="https://users.cla.umn.edu/~erm/data/Griliches2024/AFES2024.pdf" target="_blank">
+            <img src="images/Griliches.png" alt="Griliches Lecture">
+            <div class="overlay-gold"></div>
+            <div class="overlay-right">
+              <p>Griliches Lecture 2024</p>
+            </div>
+          </a> 
+        </div>
+      </div>
+    </div>
+
+    <div id="cv" class="tab-content">
+        <div class="image-text-container">
+            <img src="images/EllenMcGrattan.jpg" alt="Ellen McGrattan" class="side-image" />
+            <div class="text-content">
+              <p><b>Ellen McGrattan</b> is a professor of economics at the University of Minnesota, the director of the Heller-Hurwicz Economics Institute, a consultant at the Federal Reserve Bank of Minneapolis, a Fellow of the Econometric Society, and a research associate at NBER. She received her B.S. in economics and mathematics from Boston College and her PhD in economics from Stanford University.</p>
+              <p>For more information, see Prof. McGrattan's <a href="https://users.econ.umn.edu/~erm/vitae/erm.pdf">full CV</a>.</p>
+            </div>
+          </div>
+    </div>
+
+    <div id="research" class="tab-content">
+      <iframe id="Papers" src="PapersOption1.html" style="width: 100%; height: 100vh; border: none; overflow: hidden;"></iframe>
+    </div>
+
+    <div id="discussions" class="tab-content">
+        <iframe id="Discussions" src="DiscussionsOption1.html" style="width: 100%; height: 100vh; border: none; overflow: hidden;"></iframe>
+    </div>
+
+    <div id="teaching" class="tab-content" style="width: 100%;">
+      <h2><b>Current Teaching</b></h2>
+      <p>8185: Advanced Topics in Macroeconomics 1 & 2, Fall 2021</p>
+      <p>8792: Graduate Workshop, Fall 2021</p>
+      <p><i>Materials at <a href="https://canvas.umn.edu">canvas.umn.edu</a>.</i></p>
+    </div>
+
+    <div id="students" class="tab-content">
+      <iframe id="People" src="StudentsOption1.html" style="width: 96vw; height: 210vh; overflow: hidden;"></iframe>
+    </div>
+
+  </div>
+
+  <script>
+    function showTab(tabId) {
+      const contents = document.querySelectorAll('.tab-content');
+      const buttons = document.querySelectorAll('.tab-button');
+
+      contents.forEach(content => {
+        content.classList.remove('active');
+      });
+
+      buttons.forEach(button => {
+        button.classList.remove('active');
+      });
+
+      document.getElementById(tabId).classList.add('active');
+      event.currentTarget.classList.add('active');
+    }
+  </script>
+</body>
+
+<footer>
+    <p>The views and opinions expressed on this page are my own. The contents of this page have not been reviewed or approved by the University of Minnesota or any institution with which I am affiliated.</p>
+    <p><a href="https://cla.umn.edu/economics" target="_blank">University of Minnesota Department of Economics</a></p>
+</footer>
+</html>
